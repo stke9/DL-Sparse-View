@@ -43,7 +43,7 @@ class DnCNN_OHE(DnCNN):
         super(DnCNN_OHE, self).__init__(in_ch, out_ch, depth, ch)
 
     def forward(self, x, y, post_proc=False):
-        y_prep = one_hot_y(y)
+        y_prep = one_hot_y(y).cuda()
         noise = self.forward_base(x)
         one_hot_pred = torch.softmax(noise[:, 1:], dim=1)
         loss_one_hot = self.loss_func(one_hot_pred, y_prep)

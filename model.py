@@ -5,8 +5,8 @@ from torch.utils.data import TensorDataset, DataLoader
 from util import *
 import wandb
 
-run_name = '18layer_48ch'
-wandb.init(project='DL-Sparse-View', name=run_name)
+run_name = '12layer_64ch'
+wandb.init(project='DL-Sparse-View', name=run_name, entity='tldr-group')
 
 print('Loading dataset...')
 x, y = (torch.tensor(np.load('training_data/{}.npy'.format(pth)))
