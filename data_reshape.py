@@ -3,7 +3,7 @@ import numpy as np
 
 for pth in ['Phantom', 'FFBP128', 'Sinogram']:
     for batch in range(1, 5):
-        data_batch = np.load('training_data/batches/{}_batch{}.npy'.format(pth, batch))
+        data_batch = np.load('training_data/{}_batch{}.npy'.format(pth, batch))
         if batch==1:
             data = data_batch
         else:
