@@ -27,7 +27,7 @@ train_data = DataLoader(train_data, batch_size=batch_size,
                         shuffle=True, num_workers=workers)
 
 
-model = DnCNN_OHE(in_ch=1, out_ch=5, depth=18, ch=128)
+model = DnCNN_OHE_res(in_ch=1, out_ch=5, depth=18, ch=128)
 opt = torch.optim.Adam(model.parameters(), lr=0.0001, betas=(0.9, 0.9))
 model.cuda()
 loss_func = torch.nn.MSELoss()

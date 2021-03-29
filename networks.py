@@ -77,3 +77,22 @@ class DnCNN_OHE(DnCNN):
                 loss_pred = self.loss_func(img, y[:, 0])
                 return img, loss_pred
             return img
+
+class DnCNN_OHE_res(DnCNN_OHE):
+    def __init__(self, in_ch=1, out_ch=1, depth=18, ch=64):
+        super(DnCNN_OHE_res, self).__init__(in_ch, out_ch, depth, ch)
+        self.convs = nn.ModuleList()
+        self.norms = nn.ModuleList()
+        for i in range(depth):
+            self.convs.append(nn.Conv2d(in_channels=ch, out_channels=ch, kernel_size=3, padding=1, padding_mode='replicate', bias=False))
+            self.norms.append(nn.GroupNorm(4, ch))
+
+    def forward_base(self, x):
+        out = self.relu1(self.conv1(x))
+        for i, (conv, norm) in enumerate(zip(self.convs, self.norms)):
+            if i < 15:
+                out = self.relu1(norm(out + conv(out)))
+            else:
+                out = self.relu1(norm(conv(out)))
+        out = self.conv3(out)
+        return out
