@@ -19,7 +19,7 @@ if plot:
     plt.tight_layout()
 
 # baseline MSE
-EC = True
+EC = False
 if EC:
     phant = datasets[0]
     img = one_hot_y(torch.tensor(phant[:10]))
@@ -27,5 +27,15 @@ if EC:
     #
     plt.figure()
     diff = (((fbp - phant)**2)).mean(axis=(1, 2, 3))**0.5
-plt.hist(diff)
+    plt.hist(diff)
 
+# img = np.zeros([1024, 1024])
+# for a, l in enumerate(sino):
+#     print(a)
+#     lay = np.tile(l, (1024, 1))
+#     lay = nd.rotate(lay, a*0.7)
+#     mm = lay.shape[0] - 1024
+#     if mm!=0:
+#         edge = mm//2
+#         lay = lay[edge:-(mm-edge), edge:-(mm-edge)]
+#     img+=lay

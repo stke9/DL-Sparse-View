@@ -5,7 +5,7 @@ from torch.utils.data import TensorDataset, DataLoader
 from util import *
 import wandb
 
-run_name = '12layer_64ch'
+run_name = '12layer_128ch_quart_img'
 wandb.init(project='DL-Sparse-View', name=run_name, entity='tldr-group')
 
 print('Loading dataset...')
@@ -21,13 +21,13 @@ print('Preprocessing...')
 # train_data = DataLoader(train_data, batch_size=batch_size,
 #                         shuffle=True, num_workers=workers)
 
-x_test, y_test = x[3995:], y[3995:]
-train_data = TensorDataset(x[:3975], y[:3975])
+x_test, y_test = x[3995:, :, :256, :256], y[3995:, :, :256, :256]
+train_data = TensorDataset(x[:3975, :, :256, :256], y[:3975,:, :256, :256])
 train_data = DataLoader(train_data, batch_size=batch_size,
                         shuffle=True, num_workers=workers)
 
 
-model = DnCNN_OHE(in_ch=1, out_ch=5, depth=18, ch=48)
+model = DnCNN_OHE(in_ch=1, out_ch=5, depth=18, ch=128)
 opt = torch.optim.Adam(model.parameters(), lr=0.0001, betas=(0.9, 0.9))
 model.cuda()
 loss_func = torch.nn.MSELoss()
