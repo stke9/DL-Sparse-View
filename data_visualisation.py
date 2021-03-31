@@ -28,7 +28,8 @@ if EC:
     plt.figure()
     diff = (((fbp - phant)**2)).mean(axis=(1, 2, 3))**0.5
     plt.hist(diff)
-
+import scipy.ndimage as nd
+# sino = datasets[-1][0,0]0
 # img = np.zeros([1024, 1024])
 # for a, l in enumerate(sino):
 #     print(a)

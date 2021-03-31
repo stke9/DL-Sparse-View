@@ -5,7 +5,7 @@ from torch.utils.data import TensorDataset, DataLoader
 from util import *
 import wandb
 
-run_name = '12layer_128ch_quart_img'
+run_name = '18lay_128ch_quart_bn'
 wandb.init(project='DL-Sparse-View', name=run_name, entity='tldr-group')
 
 print('Loading dataset...')

@@ -85,7 +85,7 @@ class DnCNN_OHE_res(DnCNN_OHE):
         self.norms = nn.ModuleList()
         for i in range(depth):
             self.convs.append(nn.Conv2d(in_channels=ch, out_channels=ch, kernel_size=3, padding=1, padding_mode='replicate', bias=False))
-            self.norms.append(nn.GroupNorm(4, ch))
+            self.norms.append(nn.BatchNorm2d(ch))
 
     def forward_base(self, x):
         out = self.relu1(self.conv1(x))
