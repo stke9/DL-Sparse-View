@@ -49,7 +49,7 @@ class DnCNN_OHE(DnCNN):
         loss_one_hot = self.loss_func(one_hot_pred, y_prep)
         img = x - noise[:, 0].unsqueeze(1)
         loss_noise = (((img - y)**2) * one_hot_pred[:, -1]).mean()
-        loss = 1000 * loss_noise + loss_one_hot
+        loss = 5000 * loss_noise + loss_one_hot
         one_hot_round = torch.round(one_hot_pred)
         wandb.log({'oh': loss_one_hot,
                    'noise': loss_noise})
@@ -79,12 +79,12 @@ class DnCNN_OHE(DnCNN):
             return img
 
 class DnCNN_OHE_res(DnCNN_OHE):
-    def __init__(self, in_ch=1, out_ch=1, depth=18, ch=64):
+    def __init__(self, in_ch=1, out_ch=1, p=2, k=5, depth=18, ch=64):
         super(DnCNN_OHE_res, self).__init__(in_ch, out_ch, depth, ch)
         self.convs = nn.ModuleList()
         self.norms = nn.ModuleList()
         for i in range(depth):
-            self.convs.append(nn.Conv2d(in_channels=ch, out_channels=ch, kernel_size=3, padding=1, padding_mode='replicate', bias=False))
+            self.convs.append(nn.Conv2d(in_channels=ch, out_channels=ch, kernel_size=k, padding=p, padding_mode='replicate', bias=False))
             self.norms.append(nn.BatchNorm2d(ch))
 
     def forward_base(self, x):
