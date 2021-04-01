@@ -5,6 +5,7 @@ import wandb
 class DnCNN(nn.Module):
     def __init__(self, in_ch=1, out_ch=1, depth=18, ch=64):
         super(DnCNN, self).__init__()
+        self.depth = depth
         # in layer
         self.loss_func = nn.MSELoss()
         self.conv1 = nn.Conv2d(in_channels=in_ch, out_channels=ch, kernel_size=3, padding=1, padding_mode='replicate', bias=False)
@@ -47,7 +48,7 @@ class DnCNN_OHE(DnCNN):
         noise = self.forward_base(x)
         one_hot_pred = torch.softmax(noise[:, 1:], dim=1)
         loss_one_hot = self.loss_func(one_hot_pred, y_prep)
-        img = x - noise[:, 0].unsqueeze(1)
+        img = (x[:, 0] - noise[:, 0]).unsqueeze(1)
         loss_noise = (((img - y)**2) * one_hot_pred[:, -1]).mean()
         loss = 1000 * loss_noise + loss_one_hot
         one_hot_round = torch.round(one_hot_pred)
@@ -67,7 +68,7 @@ class DnCNN_OHE(DnCNN):
         with torch.no_grad():
             noise = self.forward_base(x)
             one_hot_pred = torch.softmax(noise[:, 1:], dim=1)
-            img = x - noise[:, 0].unsqueeze(1)
+            img = x[:, 0] - noise[:, 0].unsqueeze(1)
             one_hot_round = torch.round(one_hot_pred)
             img = img[:, 0]
             img[one_hot_round[:, 0]==1] = 0
@@ -85,14 +86,18 @@ class DnCNN_OHE_res(DnCNN_OHE):
         self.norms = nn.ModuleList()
         for i in range(depth):
             self.convs.append(nn.Conv2d(in_channels=ch, out_channels=ch, kernel_size=3, padding=1, padding_mode='replicate', bias=False))
-            self.norms.append(nn.GroupNorm(4, ch))
+            self.norms.append(nn.BatchNorm2d(ch))
 
     def forward_base(self, x):
         out = self.relu1(self.conv1(x))
-        for i, (conv, norm) in enumerate(zip(self.convs, self.norms)):
-            if i < 15:
-                out = self.relu1(norm(out + conv(out)))
+        for i in range(self.depth//2):
+            j = 2*i
+            conv1, norm1 = self.convs[j], self.norms[j]
+            conv2, norm2 = self.convs[j+1], self.norms[j+1]
+            if i < self.depth//2 - 1:
+                side = norm1(conv1(self.relu1(norm2(conv2(out)))))
+                out = self.relu1(out + side)
             else:
-                out = self.relu1(norm(conv(out)))
+                out = self.relu1(norm1(conv1(out)))
         out = self.conv3(out)
         return out
