@@ -28,7 +28,7 @@ for q in range(4):
 #     out = model.predict(x_test_rot).cpu()
     with torch.no_grad():
         one_hot_round, img = prev_model.predict(x_test_rot)
-#         print(x_test_rot.size(), img.size(), one_hot_round.size())
+        print(x_test_rot.size(), img.size(), one_hot_round.size())
         x_input = torch.cat((x_test_rot.cuda(), img, one_hot_round), 1)
 #         out, loss_pred = model.predict(x_input, y_test_rot)
 #         out = out.squeeze().cpu()
@@ -41,7 +41,7 @@ out[:, :256, :256] = quarts[0]
 out[:, :256, 256:] = quarts[1]
 out[:, 256:, 256:] = quarts[2]
 out[:, 256:, :256] = quarts[3]
-# plt.figure()
-# plt.imsave('how_im_looks.jpg', out[0], cmap='gray', vmin=0, vmax=255)
+plt.figure()
+plt.imsave('how_im_looks.jpg', out[0], cmap='gray', vmin=0, vmax=1)
 np.save('validation_data/prediction.npy', out)
 
