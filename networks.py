@@ -91,11 +91,11 @@ class DnCNN_OHE(DnCNN):
             img[one_hot_round[:, 1]==1] = 0.194
             img[one_hot_round[:, 2]==1] = 0.233
             img = img.unsqueeze(1)
-            if x.size()[1]>2:
+            if y is not None:
+                loss_pred = self.loss_func(img[:, 0], y[:, 0])
+                return img, loss_pred.item()**0.5
+            elif x.size()[1]>2:
                 return img
-            elif y:
-                loss_pred = self.loss_func(img, y[:, 0])
-                return img, loss_pred
             else:
                 return one_hot_round, img
 
