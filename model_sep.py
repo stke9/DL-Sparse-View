@@ -5,7 +5,7 @@ from torch.utils.data import TensorDataset, DataLoader
 from util import *
 import wandb
 
-run_name = '18lay_128ch_quart_bn'
+run_name = 'pure_ohe'
 wandb.init(project='DL-Sparse-View', name=run_name, entity='tldr-group')
 
 print('Loading dataset...')
@@ -27,7 +27,7 @@ train_data = DataLoader(train_data, batch_size=batch_size,
                         shuffle=True, num_workers=workers)
 
 
-model = DnCNN_OHE_res(in_ch=1, out_ch=5, depth=18, ch=128)
+model = DnCNN_Pure_OHE(in_ch=4, out_ch=5, depth=18, ch=128)
 opt = torch.optim.Adam(model.parameters(), lr=0.0001, betas=(0.9, 0.9))
 model.cuda()
 loss_func = torch.nn.MSELoss()
@@ -36,13 +36,12 @@ print('Starting training loop...')
 for epoch in range(60):
     for i, (x_train, y_train) in enumerate(train_data):
         model.zero_grad()
-        # x_train = prep_img(x_train)
-        noise, img, loss = model(x_train.cuda(), y_train.cuda())
+        loss = model(x_train.cuda(), y_train.cuda())
         loss.backward()
         opt.step()
         if i % 30 == 0:
             with torch.no_grad():
-                noise, img, t_loss = model(x_test.cuda(), y_test.cuda(), post_proc=True)
+                t_loss = model(x_test.cuda(), y_test.cuda(), post_proc=True)
                 wandb.log({'test_loss': t_loss.item()**0.5,
                            'training_loss': loss.item()**0.5})
             print(epoch, i, loss.item()**0.5)
