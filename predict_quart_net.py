@@ -25,8 +25,9 @@ for q in range(4):
 #     out = model.predict(x_test_rot).cpu()
     with torch.no_grad():
         one_hot_round, img = prev_model.predict(x_test_rot)
-        x_input = torch.cat((x_test.cuda(), img, one_hot_round), 1)
-        rot = model.predict(x_input)
+        print(x_test_rot.size(), img.size(), one_hot_round.size())
+        x_input = torch.cat((x_test_rot.cuda(), img, one_hot_round), 1)
+        out = model.predict(x_input).squeeze().cpu()
     quarts.append(rot(out, -90*q, axes=(1, 2)))
 b = x_test.shape[0]
 out = np.zeros([b, 512, 512])
