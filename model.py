@@ -66,7 +66,7 @@ for epoch in range(200):
             print(epoch, i, loss.item()**0.5)
             images = [im[j, -1].cpu() for j in range(5) for im in [x_test, noise, img, y_test, abs(img-y_test.cuda())] ]
             wandb.log({"examples" : [wandb.Image(i) for i in images]})
-    if (epoch%10) == 0:
+    if (epoch%3) == 0:
         print('saved!!!!!!!!!!!')
         torch.save(model.state_dict(), run_name +'.pt')
 
