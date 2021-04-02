@@ -45,15 +45,24 @@ class DnCNN_OHE(DnCNN):
 
     def forward(self, x, y, post_proc=False):
         y_prep = one_hot_y(y).cuda()
-        noise = self.forward_base(x)
-        one_hot_pred = torch.softmax(noise[:, 1:], dim=1)
-        loss_one_hot = self.loss_func(one_hot_pred, y_prep)
-        img = (x[:, 0] - noise[:, 0]).unsqueeze(1)
-        loss_noise = (((img - y)**2) * one_hot_pred[:, -1]).mean()
-        loss = 1000 * loss_noise + loss_one_hot
-        one_hot_round = torch.round(one_hot_pred)
-        wandb.log({'oh': loss_one_hot,
-                   'noise': loss_noise})
+        if x.size()[1]>2:
+            x_input = x[:,:2]
+            noise = self.forward_base(x_input)
+            one_hot_round = x[:,2:].detach()
+            img = (x[:, 0] - noise[:, 0]).unsqueeze(1)
+            loss = (((img - y)**2) * one_hot_round[:, -1]).mean()
+            wandb.log({'noise': loss})
+        else:
+            x_input = x
+            noise = self.forward_base(x_input)
+            one_hot_pred = torch.softmax(noise[:, 1:], dim=1)
+            loss_one_hot = self.loss_func(one_hot_pred, y_prep)
+            img = (x[:, 0] - noise[:, 0]).unsqueeze(1)
+            loss_noise = (((img - y)**2) * one_hot_pred[:, -1]).mean()
+            loss = 1000 * loss_noise + loss_one_hot
+            one_hot_round = torch.round(one_hot_pred)
+            wandb.log({'oh': loss_one_hot,
+                       'noise': loss_noise})
         if post_proc:
             img = img[:, 0]
             img[one_hot_round[:, 0]==1] = 0
@@ -62,22 +71,32 @@ class DnCNN_OHE(DnCNN):
             loss_pred = self.loss_func(img, y[:, 0])
             wandb.log({'loss_pred': loss_pred.item()**0.5})
             img = img.unsqueeze(1)
-        return one_hot_round, img, loss
+        return one_hot_round, img, 100000*loss
 
     def predict(self, x, y=None):
         with torch.no_grad():
-            noise = self.forward_base(x)
-            one_hot_pred = torch.softmax(noise[:, 1:], dim=1)
-            img = x[:, 0] - noise[:, 0].unsqueeze(1)
-            one_hot_round = torch.round(one_hot_pred)
+            if x.size()[1]>2:
+                x_input = x[:,:2]
+                noise = self.forward_base(x_input)
+                one_hot_round = x[:,2:].detach()
+                img = (x[:, 0] - noise[:, 0]).unsqueeze(1)
+            else:
+                x_input = x
+                noise = self.forward_base(x_input)
+                one_hot_pred = torch.softmax(noise[:, 1:], dim=1)
+                img = (x[:, 0] - noise[:, 0]).unsqueeze(1)
+                one_hot_round = torch.round(one_hot_pred)
             img = img[:, 0]
             img[one_hot_round[:, 0]==1] = 0
             img[one_hot_round[:, 1]==1] = 0.194
             img[one_hot_round[:, 2]==1] = 0.233
-            if y:
+            if x.size()[1]>2:
+                return img
+            elif y:
                 loss_pred = self.loss_func(img, y[:, 0])
                 return img, loss_pred
-            return img
+            else:
+                return one_hot_round, img
 
 class DnCNN_OHE_res(DnCNN_OHE):
     def __init__(self, in_ch=1, out_ch=1, depth=18, ch=64):
