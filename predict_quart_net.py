@@ -11,21 +11,20 @@ model.eval()
 model.cuda()
 
 x_test = torch.tensor(np.load('validation_data/FBP128_validation.npy')).unsqueeze(1)
-# x, y = (torch.tensor(np.load('training_data/{}.npy'.format(pth)))
-#         for pth in ['FFBP128', 'Phantom', ])
-# x_test, y_test = x[3995:], y[3995:, 0]
+x, y = (torch.tensor(np.load('training_data/{}.npy'.format(pth)))
+        for pth in ['FFBP128', 'Phantom', ])
+x_test, y_test = x[3995:], y[3995:, 0]
 quarts = []
 for q in range(4):
-    x_test_rot = torch.tensor(rot(x_test, q*90, axes=(2, 3))[:, :, :256, :256]).cuda()
-    out = model.predict(x_test_rot).cpu()
-    quarts.append(rot(out, -90*q, axes=(1, 2)))
+    out = model.predict(torch.rot90(x_test, q, dims=(2, 3))[:, :, :256, :256].cuda()).cpu()
+    quarts.append(torch.rot90(out, 4-q, dims=(1, 2)))
 b = x_test.shape[0]
 out = np.zeros([b, 512, 512])
 out[:, :256, :256] = quarts[0]
 out[:, :256, 256:] = quarts[1]
 out[:, 256:, 256:] = quarts[2]
 out[:, 256:, :256] = quarts[3]
-np.save('validation_data/prediction.npy', out)
+np.save('validation_data/predictions.npy', out)
 # # loss = loss_func(imgs, y_test[:, 0])
 # # print(loss**0.5)
 # fig, axs = plt.subplots(3, 3)

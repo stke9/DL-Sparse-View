@@ -49,7 +49,7 @@ class DnCNN_OHE(DnCNN):
         loss_one_hot = self.loss_func(one_hot_pred, y_prep)
         img = x - noise[:, 0].unsqueeze(1)
         loss_noise = (((img - y)**2) * one_hot_pred[:, -1].detach()).mean()
-        loss = 30000 * loss_noise + loss_one_hot
+        loss = 5000 * loss_noise + loss_one_hot
         one_hot_round = torch.round(one_hot_pred)
         wandb.log({'oh': loss_one_hot,
                    'noise': loss_noise})
@@ -79,7 +79,7 @@ class DnCNN_OHE(DnCNN):
             return img
 
 class DnCNN_OHE_res(DnCNN_OHE):
-    def __init__(self, in_ch=1, out_ch=1, p=2, k=5, depth=18, ch=64):
+    def __init__(self, in_ch=1, out_ch=1, p=1, k=3, depth=18, ch=64):
         super(DnCNN_OHE_res, self).__init__(in_ch, out_ch, depth, ch)
         self.convs = nn.ModuleList()
         self.norms = nn.ModuleList()
