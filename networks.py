@@ -98,19 +98,14 @@ class DnCNN_OHE_res(DnCNN_OHE):
         return out
 
 class DnCNN_Pure_OHE(DnCNN_OHE_res):
-    def __init__(self, in_ch=1, out_ch=4, depth=18, ch=64):
-        super(DnCNN_Pure_OHE, self).__init__(in_ch, out_ch, depth, ch)
+    def __init__(self, in_ch=1, out_ch=4, p=1, k=3, depth=18, ch=64):
+        super(DnCNN_Pure_OHE, self).__init__(in_ch, out_ch, p, k, depth, ch)
 
     def forward(self, x, y, post_proc=False):
         y_prep = one_hot_y(y).cuda()
         out = self.forward_base(x)
         one_hot_pred = torch.softmax(out, dim=1)
         loss_one_hot = self.loss_func(one_hot_pred, y_prep)
-        m = torch.argmax(one_hot_pred, 1)
-        for ch in range(4):
-            one_hot_pred[:, ch][m==ch] = 1
-            one_hot_pred[:, ch][m!=ch] = 0
-        loss_one_hot_true = self.loss_func(one_hot_pred, y_prep)
-        wandb.log({'oh_error': loss_one_hot,
-                   'true_error': loss_one_hot_true})
-        return loss_one_hot
+        # loss_one_hot_true = self.loss_func(one_hot_pred, y_prep)
+        wandb.log({'oh_error': loss_one_hot})
+        return loss_one_hot, y_prep, one_hot_pred
