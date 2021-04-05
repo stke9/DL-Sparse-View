@@ -90,10 +90,7 @@ class DnCNN_OHE_res(DnCNN_OHE):
     def forward_base(self, x):
         out = self.relu1(self.conv1(x))
         for i, (conv, norm) in enumerate(zip(self.convs, self.norms)):
-            if i < 15:
-                out = self.relu1(norm(out + conv(out)))
-            else:
-                out = self.relu1(norm(conv(out)))
+            out = self.relu1(norm(out + conv(out)))
         out = self.conv3(out)
         return out
 

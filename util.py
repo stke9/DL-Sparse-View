@@ -13,7 +13,7 @@ def one_hot_y(img, phases=(0, 0.194, 0.233)):
     b, c, x, y = img.shape
     oh_img = torch.zeros([b, 4, x, y])
     for i, ph in enumerate(phases):
-        oh_img[:, i][img[:, 0] == ph] = 0.9
-    oh_img[:, -1][oh_img.mean(dim=1) == 0] = 0.9
+        oh_img[:, i][img[:, 0] == ph] = 1
+    oh_img[:, -1][oh_img.mean(dim=1) == 0] = 1.5
     return oh_img
 
